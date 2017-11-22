@@ -1,9 +1,13 @@
 package com.company.demo.web.auth;
 
+import com.haulmont.cuba.core.global.PasswordEncryption;
+import com.haulmont.cuba.security.auth.AuthenticationService;
+import com.haulmont.cuba.security.auth.LoginPasswordCredentials;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.web.auth.CubaAuthProvider;
 import org.apache.commons.lang.StringUtils;
 
+import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -17,9 +21,16 @@ public class SimpleTokenAuthProvider implements CubaAuthProvider {
 
     public static final String TOKEN_PRINCIPAL_SESSION_ATTR = "TOKEN_PRINCIPAL";
 
+    @Inject
+    private AuthenticationService authenticationService;
+
+    @Inject
+    private PasswordEncryption passwordEncryption;
+
     @Override
-    public void authenticate(String login, String password, Locale messagesLocale) throws LoginException {
-        throw new UnsupportedOperationException("Use standard auth only");
+    public void authenticate(String login, String password, Locale locale) throws LoginException {
+        authenticationService.authenticate(
+                new LoginPasswordCredentials(login, passwordEncryption.getPlainHash(password), locale));
     }
 
     @Override
@@ -33,7 +44,8 @@ public class SimpleTokenAuthProvider implements CubaAuthProvider {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         // here we check request parameter and if it is a correct token, then login user as passed user name
         // http://localhost:8080/app?token=LOG_IN_ME_PLEASE&user=admin
 
