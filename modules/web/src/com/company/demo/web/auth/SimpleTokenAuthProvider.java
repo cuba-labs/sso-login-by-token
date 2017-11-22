@@ -61,6 +61,10 @@ public class SimpleTokenAuthProvider implements CubaAuthProvider {
         if (request.getParameter("user") != null
                 && "LOG_IN_ME_PLEASE".equals(request.getParameter("token"))) {
 
+            // Uncomment if you want to reset previous session completely, even if it is active
+            // session.invalidate();
+            // session = httpRequest.getSession();
+
             SimpleTokenPrincipalImpl sessionPrincipal = new SimpleTokenPrincipalImpl(request.getParameter("user"));
             session.setAttribute(TOKEN_PRINCIPAL_SESSION_ATTR, sessionPrincipal);
             httpResponse.sendRedirect(httpRequest.getRequestURL().toString());
